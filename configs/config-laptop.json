@@ -1,5 +1,5 @@
 {
-    "threads": 24,
+    "threads": 8,
     "temp_dir": "C:/archive-temp",
     "dest_base": "D:/",
     "games": {

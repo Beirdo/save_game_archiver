@@ -70,8 +70,11 @@ for (game, item) in games.items():
 
         end_time = time.time()
         duration = end_time - start_time
+        filesize = os.path.getsize(destination_file)
+        rate = filesize / duration
 
-        logger.info("Unarchived %s in %.3fs" % (destination_file, duration))
+        logger.info("Unarchived %s (%sB) in %.3fs (%sB/s)" %
+                    (destination_file, numToReadable(filesize), duration, numToReadable(rate)))
 
 process_end_time = time.time()
 duration = process_end_time - process_start_time

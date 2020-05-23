@@ -88,12 +88,16 @@ for (game, item) in games.items():
 
         end_time = time.time()
         duration = end_time - start_time
+        rate = orig_size / duration
 
-        logger.info("Archived %s files (%sB) in %.3fs" % (file_count, numToReadable(orig_size), duration))
+        logger.info("Archived %s files (%sB) in %.3fs: %sB/s" %
+                    (file_count, numToReadable(orig_size), duration, numToReadable(rate)))
 
-        logger.info("Compressing (%s threads) %s to %s" % (threads, tarfile, destination_file))
         start_time = time.time()
-        blocksize = 10 * 2**20
+        blocksize = int(min(100 * 2**20, orig_size/threads))
+        logger.info("Compressing (%s threads, blocksize %sB) %s to %s" %
+                    (threads, numToReadable(blocksize), tarfile, destination_file))
+
         with mgzip.open(destination_file, "wb", thread=threads, blocksize=blocksize) as my_gzip:
             with open(tarfile, "rb") as my_tar:
                 my_gzip.write(my_tar.read())
@@ -102,7 +106,9 @@ for (game, item) in games.items():
         duration = end_time - start_time
 
         out_size = os.path.getsize(destination_file)
-        logger.info("Compressed %sB into %sB in %.3fs" % (numToReadable(orig_size), numToReadable(out_size), duration))
+        rate = orig_size / duration
+        logger.info("Compressed %sB into %sB in %.3fs: %sB/s" %
+                    (numToReadable(orig_size), numToReadable(out_size), duration, numToReadable(rate)))
 
         os.unlink(tarfile)
 

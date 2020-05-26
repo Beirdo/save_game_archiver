@@ -23,7 +23,8 @@
             "source_base": "~/Documents/Out of the Park Developments/OOTP Baseball 21/saved_games",
             "dest_dir": "OOTP Baseball 21 Save Games",
             "source_dirs": [
-                "New Game.lg"
+                "New Game.lg",
+                "Challenge.lg"
             ]
         }
     }

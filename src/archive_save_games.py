@@ -7,7 +7,7 @@ from tarfile import TarFile, GNU_FORMAT
 
 import mgzip as mgzip
 
-from utils import numToReadable
+from utils import numToReadable, generate_sha1sum
 
 process_start_time = time.time()
 
@@ -49,6 +49,8 @@ for (game, item) in games.items():
     if not source_base or not destination:
         continue
 
+    exclude_dirs = item.get("exclude_dirs", [])
+
     source_base = source_base.replace("/", os.path.sep)
     source_base = os.path.expanduser(source_base)
     source_split = source_base + os.path.sep
@@ -59,28 +61,53 @@ for (game, item) in games.items():
     for source_dir in source_dirs:
         tarfile = os.path.join(temp_dir, source_dir + ".tar")
         destination_file = os.path.join(destination, source_dir + ".tar.gz")
+        manifest_file = os.path.join(destination, source_dir + ".manifest.json")
         source = os.path.join(source_base, source_dir)
 
         logger.info("Archive source: %s" % source)
         logger.info("Temporary archive (uncompressed): %s" % tarfile)
         logger.info("Archive destination: %s" % destination_file)
+        logger.info("Manifest file: %s" % manifest_file)
 
         file_count = 0
         orig_size = 0
         start_time = time.time()
-        to_archive = {}
+        manifest = {}
         for (root, dirs, files) in os.walk(source, topdown=True):
+            basedirname = os.path.basename(root)
+            if basedirname in exclude_dirs:
+                continue
+
             for file_ in files:
                 filename = os.path.join(root, file_)
                 arcfile = filename.split(source_split)[1]
-                orig_size += os.path.getsize(filename)
-                to_archive[filename] = arcfile
+                filesize = os.path.getsize(filename)
+                orig_size += filesize
+                manifest[filename] = {
+                    "filename": filename,
+                    "arcfile": arcfile,
+                    "size": filesize,
+                    "sha1sum": generate_sha1sum(filename),
+                }
 
-        total_files = len(to_archive)
+        total_files = len(manifest)
         logger.info("Files to archive: %s (%sB)" % (total_files, numToReadable(orig_size)))
 
+        try:
+            with open(manifest_file, "r") as f:
+                old_manifest = json.load(f)
+        except Exception:
+            old_manifest = {}
+
+        if manifest == old_manifest:
+            logger.info("Manifest matches what exists, skipping.")
+            continue
+
+        with open(manifest_file, "w") as f:
+            json.dump(manifest, f, indent=2, sort_keys=True)
+
         with TarFile(tarfile, "w", format=GNU_FORMAT) as my_tar:
-            for (filename, arcfile) in sorted(to_archive.items()):
+            for (filename, arcfile) in sorted(manifest.items()):
                 file_count += 1
                 if file_count % 100 == 0:
                     logger.info("Progress: %s/%s files written" % (file_count, total_files))

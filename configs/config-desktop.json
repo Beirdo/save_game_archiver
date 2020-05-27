@@ -1,31 +1,61 @@
 {
-    "threads": 18,
-    "temp_dir": "D:/archive-temp",
-    "dest_base": "I:/",
-    "games": {
-        "FHM6": {
-            "source_base": "~/Documents/Out of the Park Developments/Franchise Hockey Manager 6/saved_games",
-            "dest_dir": "FHM6 Save Games",
-            "source_dirs": [
-                "Bah Humbug.lg",
-                "Beirdo's Test League - Commish.lg",
-                "Bleh.lg",
-                "Challenge.lg",
-                "Cherry.lg",
-                "COVID-19 Sucks.lg",
-                "fun times.lg",
-                "MLSH.lg",
-                "ONHL.lg",
-                "TestLeague.lg"
-            ]
-        },
-        "OOTP21": {
-            "source_base": "~/Documents/Out of the Park Developments/OOTP Baseball 21/saved_games",
-            "dest_dir": "OOTP Baseball 21 Save Games",
-            "source_dirs": [
-                "New Game.lg",
-                "Challenge.lg"
-            ]
-        }
+  "threads": 18,
+  "temp_dir": "D:/archive-temp",
+  "dest_base": "I:/",
+  "games": {
+    "FHM6": {
+      "source_base": "~/Documents/Out of the Park Developments/Franchise Hockey Manager 6/saved_games",
+      "dest_dir": "FHM6 Save Games",
+      "exclude_dirs": [
+        "auto-save",
+        "import_export",
+        "rs_one",
+        "rs_two",
+        "temp"
+      ],
+      "source_dirs": [
+        "Bah Humbug.lg",
+        "Beirdo's Test League - Commish.lg",
+        "Bleh.lg",
+        "Challenge.lg",
+        "Cherry.lg",
+        "COVID-19 Sucks.lg",
+        "fun times.lg",
+        "MLSH.lg",
+        "ONHL.lg",
+        "TestLeague.lg"
+      ]
+    },
+    "OOTP21": {
+      "source_base": "~/Documents/Out of the Park Developments/OOTP Baseball 21/saved_games",
+      "dest_dir": "OOTP Baseball 21 Save Games",
+      "exclude_dirs": [
+        "auto-save",
+        "ballcaps",
+        "dump",
+        "import_export",
+        "jerseys",
+        "temp"
+      ],
+      "source_dirs": [
+        "New Game.lg",
+        "Challenge.lg"
+      ]
+    },
+    "OOTP21-PerfectTeam": {
+      "source_base": "~/Documents/Out of the Park Developments/OOTP Baseball 21/saved_games",
+      "dest_dir": "OOTP Baseball 21 Save Games",
+      "exclude_dirs": [
+        "auto-save",
+        "ballcaps",
+        "dump",
+        "import_export",
+        "jerseys",
+        "temp"
+      ],
+      "source_dirs": [
+        "Start_Beirdo.pt"
+      ]
     }
+  }
 }

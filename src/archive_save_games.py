@@ -73,6 +73,7 @@ for (game, item) in games.items():
         orig_size = 0
         start_time = time.time()
         manifest = {}
+        logger.info("Generating manifest file")
         for (root, dirs, files) in os.walk(source, topdown=True):
             basedirname = os.path.basename(root)
             if basedirname in exclude_dirs:
@@ -103,11 +104,14 @@ for (game, item) in games.items():
             logger.info("Manifest matches what exists, skipping.")
             continue
 
-        with open(manifest_file, "w") as f:
-            json.dump(manifest, f, indent=2, sort_keys=True)
-
+        logger.info("Archiving to tar file")
         with TarFile(tarfile, "w", format=GNU_FORMAT) as my_tar:
-            for (filename, arcfile) in sorted(manifest.items()):
+            for (_, item) in sorted(manifest.items()):
+                filename = item.get("filename", None)
+                arcfile = item.get("arcfile", None)
+                if not filename or not arcfile:
+                    continue
+
                 file_count += 1
                 if file_count % 100 == 0:
                     logger.info("Progress: %s/%s files written" % (file_count, total_files))
@@ -119,6 +123,10 @@ for (game, item) in games.items():
 
         logger.info("Archived %s files (%sB) in %.3fs: %sB/s" %
                     (file_count, numToReadable(orig_size), duration, numToReadable(rate)))
+
+        logger.info("Writing manifest file")
+        with open(manifest_file, "w") as f:
+            json.dump(manifest, f, indent=2, sort_keys=True)
 
         start_time = time.time()
         blocksize = int(min(100 * 2**20, orig_size/threads))

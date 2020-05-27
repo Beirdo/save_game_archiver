@@ -8,6 +8,7 @@
       "dest_dir": "FHM6 Save Games",
       "exclude_dirs": [
         "auto-save",
+        "graphics/player_pics",
         "import_export",
         "rs_one",
         "rs_two",

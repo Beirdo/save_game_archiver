@@ -1,13 +1,15 @@
 import json
 import logging
 import os
+import re
 import sys
 import time
 from tarfile import TarFile, GNU_FORMAT
 
 import mgzip as mgzip
 
-from utils import numToReadable, generate_sha1sum
+from utils import numToReadable, generate_sha1sum, generate_exclude_dirs, generate_manifest, load_manifest_file, \
+    write_manifest_file
 
 process_start_time = time.time()
 
@@ -49,7 +51,7 @@ for (game, item) in games.items():
     if not source_base or not destination:
         continue
 
-    exclude_dirs = item.get("exclude_dirs", [])
+    exclude_dirs = generate_exclude_dirs(item)
 
     source_base = source_base.replace("/", os.path.sep)
     source_base = os.path.expanduser(source_base)
@@ -69,46 +71,32 @@ for (game, item) in games.items():
         logger.info("Archive destination: %s" % destination_file)
         logger.info("Manifest file: %s" % manifest_file)
 
-        file_count = 0
-        orig_size = 0
         start_time = time.time()
-        manifest = {}
-        logger.info("Generating manifest file")
-        for (root, dirs, files) in os.walk(source, topdown=True):
-            basedirname = os.path.basename(root)
-            if basedirname in exclude_dirs:
-                continue
+        manifest = generate_manifest(source_base, source_dir, exclude_dirs)
+        orig_size = sum([item.get("size", 0) for item in manifest.values()])
+        logger.info("Files to archive: %s (%sB)" % (len(manifest), numToReadable(orig_size)))
 
-            for file_ in files:
-                filename = os.path.join(root, file_)
-                arcfile = filename.split(source_split)[1]
-                filesize = os.path.getsize(filename)
-                orig_size += filesize
-                manifest[filename] = {
-                    "filename": filename,
-                    "arcfile": arcfile,
-                    "size": filesize,
-                    "sha1sum": generate_sha1sum(filename),
-                }
+        old_manifest = load_manifest_file(manifest_file)
 
-        total_files = len(manifest)
-        logger.info("Files to archive: %s (%sB)" % (total_files, numToReadable(orig_size)))
+        archive_manifest = {filename: item for (filename, item) in manifest.items()
+                            if old_manifest.get(filename, {}).get("size", None) != item.get("size", None)
+                            or old_manifest.get(filename, {}).get("sha1", None) != item.get("sha1", None)}
 
-        try:
-            with open(manifest_file, "r") as f:
-                old_manifest = json.load(f)
-        except Exception:
-            old_manifest = {}
-
-        if manifest == old_manifest:
+        if not archive_manifest:
             logger.info("Manifest matches what exists, skipping.")
             continue
 
+        orig_size = sum([item.get("size", 0) for item in archive_manifest.values()])
+
+        total_files = len(archive_manifest)
+        logger.info("Files to archive (changed files only): %s (%sB)" % (total_files, numToReadable(orig_size)))
+
+        to_archive = {item.get("filename", None): item.get("arcfile", None) for item in archive_manifest.values()}
+
         logger.info("Archiving to tar file")
+        file_count = 0
         with TarFile(tarfile, "w", format=GNU_FORMAT) as my_tar:
-            for (_, item) in sorted(manifest.items()):
-                filename = item.get("filename", None)
-                arcfile = item.get("arcfile", None)
+            for (filename, arcfile) in sorted(to_archive.items()):
                 if not filename or not arcfile:
                     continue
 
@@ -124,9 +112,7 @@ for (game, item) in games.items():
         logger.info("Archived %s files (%sB) in %.3fs: %sB/s" %
                     (file_count, numToReadable(orig_size), duration, numToReadable(rate)))
 
-        logger.info("Writing manifest file")
-        with open(manifest_file, "w") as f:
-            json.dump(manifest, f, indent=2, sort_keys=True)
+        write_manifest_file(manifest_file, manifest)
 
         start_time = time.time()
         blocksize = int(min(100 * 2**20, orig_size/threads))

@@ -63,20 +63,22 @@ for (game, item) in games.items():
     for source_dir in source_dirs:
         tarfile = os.path.join(temp_dir, source_dir + ".tar")
         destination_file = os.path.join(destination, source_dir + ".tar.gz")
-        manifest_file = os.path.join(destination, source_dir + ".manifest.json")
+        in_manifest_file = os.path.join(destination, source_dir + ".unarchived.manifest.json")
+        out_manifest_file = os.path.join(destination, source_dir + ".archived.manifest.json")
         source = os.path.join(source_base, source_dir)
 
         logger.info("Archive source: %s" % source)
         logger.info("Temporary archive (uncompressed): %s" % tarfile)
         logger.info("Archive destination: %s" % destination_file)
-        logger.info("Manifest file: %s" % manifest_file)
+        logger.info("Unarchived Manifest file: %s" % in_manifest_file)
+        logger.info("Archived Manifest file: %s" % out_manifest_file)
 
         start_time = time.time()
         manifest = generate_manifest(source_base, source_dir, exclude_dirs)
         orig_size = sum([item.get("size", 0) for item in manifest.values()])
         logger.info("Files to archive: %s (%sB)" % (len(manifest), numToReadable(orig_size)))
 
-        old_manifest = load_manifest_file(manifest_file)
+        old_manifest = load_manifest_file(in_manifest_file)
 
         archive_manifest = {filename: item for (filename, item) in manifest.items()
                             if old_manifest.get(filename, {}).get("size", None) != item.get("size", None)
@@ -112,7 +114,7 @@ for (game, item) in games.items():
         logger.info("Archived %s files (%sB) in %.3fs: %sB/s" %
                     (file_count, numToReadable(orig_size), duration, numToReadable(rate)))
 
-        write_manifest_file(manifest_file, manifest)
+        write_manifest_file(out_manifest_file, manifest)
 
         start_time = time.time()
         blocksize = int(min(100 * 2**20, orig_size/threads))

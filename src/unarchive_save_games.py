@@ -6,7 +6,8 @@ import sys
 import tarfile
 import time
 
-from utils import numToReadable, generate_sha1sum, generate_exclude_dirs, generate_manifest, load_manifest_file
+from utils import numToReadable, generate_sha1sum, generate_exclude_dirs, generate_manifest, load_manifest_file, \
+    write_manifest_file
 
 process_start_time = time.time()
 
@@ -58,14 +59,16 @@ for (game, item) in games.items():
 
     for source_dir in source_dirs:
         destination_file = os.path.join(destination, source_dir + ".tar.gz")
-        manifest_file = os.path.join(destination, source_dir + ".manifest.json")
+        in_manifest_file = os.path.join(destination, source_dir + ".archived.manifest.json")
+        out_manifest_file = os.path.join(destination, source_dir + ".unarchived.manifest.json")
         source = os.path.join(source_base, source_dir)
 
         logger.info("Archive source: %s" % destination_file)
         logger.info("Archive destination: %s" % source)
-        logger.info("Manifest file: %s" % manifest_file)
+        logger.info("Archived Manifest file: %s" % in_manifest_file)
+        logger.info("Unarchived Manifest file: %s" % out_manifest_file)
 
-        new_manifest = load_manifest_file(manifest_file)
+        new_manifest = load_manifest_file(in_manifest_file)
 
         exclude_arcfiles = set()
 
@@ -95,6 +98,8 @@ for (game, item) in games.items():
 
         logger.info("Unarchived %s (%sB) in %.3fs (%sB/s)" %
                     (destination_file, numToReadable(filesize), duration, numToReadable(rate)))
+
+        write_manifest_file(out_manifest_file, new_manifest)
 
 process_end_time = time.time()
 duration = process_end_time - process_start_time

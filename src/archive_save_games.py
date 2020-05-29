@@ -15,7 +15,7 @@ process_start_time = time.time()
 
 logger = logging.getLogger(__name__)
 
-logging.basicConfig(format="%(asctime)s [%(levelname)s] - %(message)s", level=logging.INFO)
+logging.basicConfig(format="%(asctime)s [%(levelname)s] (%(threadName)s) - %(message)s", level=logging.INFO)
 
 homedir = os.path.expanduser("~")
 config_file = os.path.join(homedir, ".archive", "config.json")
@@ -77,10 +77,9 @@ for (game, item) in games.items():
 
         old_manifest = load_manifest_file(in_manifest_file)
 
-        manifest = generate_manifest(source_base, source_dir, exclude_dirs, len(old_manifest))
+        manifest = generate_manifest(source_base, source_dir, exclude_dirs, old_count=len(old_manifest), threads=threads)
         orig_size = sum([item.get("size", 0) for item in manifest.values()])
         logger.info("Files to archive: %s (%sB)" % (len(manifest), numToReadable(orig_size)))
-
 
         archive_manifest = {filename: item for (filename, item) in manifest.items()
                             if old_manifest.get(filename, {}).get("size", None) != item.get("size", None)

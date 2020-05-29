@@ -13,7 +13,7 @@ process_start_time = time.time()
 
 logger = logging.getLogger(__name__)
 
-logging.basicConfig(format="%(asctime)s [%(levelname)s] - %(message)s", level=logging.INFO)
+logging.basicConfig(format="%(asctime)s [%(levelname)s] (%(threadName)s) - %(message)s", level=logging.INFO)
 
 homedir = os.path.expanduser("~")
 config_file = os.path.join(homedir, ".archive", "config.json")
@@ -73,7 +73,7 @@ for (game, item) in games.items():
         exclude_arcfiles = set()
 
         if new_manifest:
-            old_manifest = generate_manifest(source_base, source_dir, exclude_dirs)
+            old_manifest = generate_manifest(source_base, source_dir, exclude_dirs, threads=threads)
             exclude_arcfiles = {item.get("arcfile", None).replace(os.path.sep, "/")
                                 for (filename, item) in old_manifest.items()
                                 if new_manifest.get(filename, {}).get("sha1sum", None) == item.get("sha1sum", None)

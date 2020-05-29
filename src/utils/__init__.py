@@ -36,7 +36,7 @@ def generate_exclude_dirs(item):
     return exclude_dirs
 
 
-def generate_manifest(source_base, source_dir, exclude_dirs):
+def generate_manifest(source_base, source_dir, exclude_dirs, old_count=-1):
     source = os.path.join(source_base, source_dir)
     source_split = source_base + os.path.sep
 
@@ -48,9 +48,10 @@ def generate_manifest(source_base, source_dir, exclude_dirs):
         if not basedirname:
             continue
 
-        found = list(filter(lambda x: x.search(basedirname), exclude_dirs))
-        if found:
-            continue
+        if old_count != 0:
+            found = list(filter(lambda x: x.search(basedirname), exclude_dirs))
+            if found:
+                continue
 
         for file_ in files:
             filename = os.path.join(root, file_)

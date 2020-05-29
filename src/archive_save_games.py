@@ -74,11 +74,13 @@ for (game, item) in games.items():
         logger.info("Archived Manifest file: %s" % out_manifest_file)
 
         start_time = time.time()
-        manifest = generate_manifest(source_base, source_dir, exclude_dirs)
+
+        old_manifest = load_manifest_file(in_manifest_file)
+
+        manifest = generate_manifest(source_base, source_dir, exclude_dirs, len(old_manifest))
         orig_size = sum([item.get("size", 0) for item in manifest.values()])
         logger.info("Files to archive: %s (%sB)" % (len(manifest), numToReadable(orig_size)))
 
-        old_manifest = load_manifest_file(in_manifest_file)
 
         archive_manifest = {filename: item for (filename, item) in manifest.items()
                             if old_manifest.get(filename, {}).get("size", None) != item.get("size", None)

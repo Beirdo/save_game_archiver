@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+import sys
 import time
 from concurrent.futures import ALL_COMPLETED
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -45,6 +46,7 @@ def generate_manifest_for_file(item):
     if filename:
         item["size"] = os.path.getsize(filename)
         item["sha1sum"] = generate_sha1sum(filename)
+    return item
 
 
 def generate_manifest(source_base, source_dir, exclude_dirs, old_count=-1, threads=8):
@@ -57,8 +59,6 @@ def generate_manifest(source_base, source_dir, exclude_dirs, old_count=-1, threa
     logger.info("Generating local manifest to support filtering")
     for (root, dirs, files) in os.walk(source, topdown=True):
         basedir_name = (root + os.path.sep).split(subdir_split)[1].rstrip(os.path.sep)
-        if not basedir_name:
-            continue
 
         if old_count != 0:
             found = list(filter(lambda x: x.search(basedir_name), exclude_dirs))
@@ -67,7 +67,7 @@ def generate_manifest(source_base, source_dir, exclude_dirs, old_count=-1, threa
 
         for file_ in files:
             filename = os.path.join(root, file_)
-            arcfile = filename.split(source_split)[1]
+            arcfile = os.path.join(basedir_name, file_)
             manifest[filename] = {
                 "filename": filename,
                 "arcfile": arcfile,

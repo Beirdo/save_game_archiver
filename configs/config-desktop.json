@@ -9,6 +9,7 @@
       "exclude_dirs": [
         "auto-save",
         "graphics/player_pics",
+        "graphics/personnel_pics",
         "import_export",
         "rs_one",
         "rs_two",
@@ -24,7 +25,7 @@
         "fun times.lg",
         "MLSH.lg",
         "ONHL.lg",
-        "TestLeague.lg".
+        "TestLeague.lg",
         "Relegation.lg"
       ]
     },

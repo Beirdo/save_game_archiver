@@ -89,7 +89,7 @@ for (game, item) in games.items():
             members = list(filter(lambda x: x.name not in exclude_arcfiles, members))
             logger.info("Files to unarchive after filtering out unchanged files: %s" % len(members))
             if members:
-                my_tar.extractall(path=source_base, members=members)
+                my_tar.extractall(path=source, members=members)
 
         end_time = time.time()
         duration = end_time - start_time

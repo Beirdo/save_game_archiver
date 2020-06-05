@@ -59,6 +59,13 @@
       "source_dirs": [
         "Start_Beirdo.pt"
       ]
+    },
+    "FootballManager2020": {
+      "source_base": "~/Documents/Sports Interactive/Football Manager 2020",
+      "dest_dir": "Football Manager 2020 Save Ganes",
+      "source_dirs": [
+        "games"
+      ]
     }
   }
 }

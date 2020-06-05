@@ -62,7 +62,7 @@
     },
     "FootballManager2020": {
       "source_base": "~/Documents/Sports Interactive/Football Manager 2020",
-      "dest_dir": "Football Manager 2020 Save Ganes",
+      "dest_dir": "Football Manager 2020 Save Games",
       "source_dirs": [
         "games"
       ]

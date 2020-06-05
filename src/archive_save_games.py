@@ -41,6 +41,9 @@ temp_dir = temp_dir.replace("/", os.path.sep)
 
 games = config.get("games", {})
 
+if len(sys.argv) > 1:
+    games = dict(filter(lambda x: x[0] in sys.argv[1:], games.items()))
+
 for (game, item) in games.items():
     source_dirs = item.get("source_dirs", [])
 
